@@ -17,7 +17,9 @@ class CreatePurchasesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('seller_id');
-            $table->string('description');
+            $table->date('date');
+            $table->string('description')->nullable();
+            $table->boolean('share');
             $table->float('amount', 8, 2);
             $table->timestamps();
 

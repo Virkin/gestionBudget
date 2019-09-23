@@ -16,10 +16,11 @@ class CreateSellersTable extends Migration
         Schema::create('sellers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('street');
-            $table->string('postal_code');
-            $table->unsignedBigInteger('city_id');
-            $table->unsignedBigInteger('country_id');
+            $table->string('street')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->unsignedBigInteger('city_id')->nullable();
+            $table->unsignedBigInteger('country_id')->nullable();
+            $table->string('url')->nullable();
             $table->timestamps();
 
             $table->foreign('city_id')->references('id')->on('cities');
