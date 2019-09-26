@@ -1,96 +1,131 @@
-<!--<script>
-  //Importing Line class from the vue-chartjs wrapper
-  import { Line } from 'vue-chartjs'
-
-  //Exporting this so it can be used in other components
-  export default {
-    extends: Line,
-    data () {
-      return {
-        datas: {
-          //Data to be represented on x-axis
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-          datasets: [
-            {
-              label: 'Data One',
-              //Data to be represented on y-axis
-              backgroundColor : ['rgba(47, 152, 208, 0.2)'],
-              borderColor: ['rgba(19, 147, 228,1)'],
-              lineTension: 0,
-              data: [40, 20, 30, 50, 90, 10, 20, 40, 50, 70, 90, 100]
-            },{
-              label: 'Data two',
-              //Data to be represented on y-axis
-              backgroundColor : ['rgba(207, 62, 28, 0.2)'],
-              borderColor: ['rgba(219, 47, 28,1)'],
-              lineTension: 0,
-              data: [40, 6, 30, 56, 90, 67, 20, 40, 50, 70, 90, 10]
-            }
-          ]
-        },
-        //Chart.js options that controls the appearance of the chart
-        options: {
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: true
-              },
-              gridLines: {
-                display: true
-              }
-            }],
-            xAxes: [ {
-              gridLines: {
-                display: false
-              }
-            }]
-          },
-          legend: {
-            display: true
-          },
-          responsive: true,
-          maintainAspectRatio: false
-        }
-      }
-    },
-    mounted () {
-      //renderChart function renders the chart with the datacollection and options object.
-      this.renderChart(this.datas, this.options)
-    }
-  }
-</script>-->
-
 <script>
+
 import { Line } from 'vue-chartjs';
 
-export default {
-   extends: Line,
-   mounted() {
-         let uri = 'http://localhost:8000/getData';
-         let Time = new Array();
-         let Labels = new Array();
-         let Amount = new Array();
-         this.axios.get(uri).then((response) => {
-            let data = response.data;
-            if(data) {
-               data.forEach(element => {
-               Time.push(element.date);
-               Labels.push(element.id);
-               Amount.push(element.amount);
-               });
-               this.renderChart({
-               labels: Time,
-               datasets: [{
-                  label: 'Purchase',
-                  backgroundColor: '#FC2525',
-                  data: Amount
-            }]
-         }, {responsive: true, maintainAspectRatio: false})
-       }
-       else {
-          console.log('No data');
-       }
-      });            
-   }
+function makeRequest(method, url)
+{
+    return new Promise(function (resolve, reject)
+    {
+        axios.get(url).then(function (response) 
+        {
+            // handle success
+            resolve(response.data);
+        })
+        .catch(function (error) 
+        {
+            // handle error
+            reject(error);
+        });
+    });
 }
+
+export default 
+{
+    extends: Line,
+    async mounted() 
+    {
+        let uriData = 'http://127.0.0.1:8000/getData';
+        let uriUsers = 'http://127.0.0.1:8000/getUsers';
+
+        let Users = [];
+
+        let Time = new Array();
+        let Labels = new Array();
+        let total = 0;
+
+        let data = await makeRequest("GET",uriData);
+    
+        let Total = {};
+        Total["name"] = "Total";
+        Total["purchase"] = [];
+
+
+        for (var i = 0; i < data.length; i++)
+        {
+            let row = data[i];
+            
+            Time.push(row.date);
+            Labels.push(row.id);
+
+            total += row.amount;
+
+            Total["purchase"].push(total) 
+        }
+
+        Users.push(Total)
+
+        let users = await makeRequest("GET", uriUsers);
+
+        for (var i = 0; i < users.length; i++)
+        {
+            let user = users[i]
+
+            let uriDataUser = uriData+'/'+user.id;
+
+            let User = {};
+            User["name"] = user.name;
+            User["purchase"] = [];
+
+            let usersData = await makeRequest("GET", uriDataUser);
+
+            let k=0;
+            let total = 0;
+
+            for (var j = 0; j < usersData.length; j++)
+            {
+                let sameDate = usersData[j].date.localeCompare(data[k].date);
+
+                if(sameDate == 0)
+                {
+                    total += usersData[j].amount;
+                }
+              
+                User["purchase"].push(total);
+                
+                if(k<data.length)
+                {
+                    k++;
+                }
+
+                if((sameDate != 0 || j==usersData.length-1) && k<data.length)
+                {
+                    j--;
+                }
+            }
+
+            Users.push(User);
+        }
+        
+        let lineChart =  
+        {
+            labels: Time,
+            datasets: []
+        };
+
+        let lineChartOptions = {responsive: true, maintainAspectRatio: false};
+
+        console.log(Time);
+     
+        for (var UserId in Users) 
+        {
+            let User = Users[UserId]
+            lineChart.datasets.push(
+            {
+                label: User.name,
+                fillColor: 'rgba(220,220,220,0.2)',
+                strokeColor: 'rgba(220,220,220,1)',
+                pointColor: 'rgba(220,220,220,1)',
+                pointStrokeColor: '#fff',
+                pointHighlightFill: '#fff',
+                pointHighlightStroke:
+                'rgba(220,220,220,1)',
+                lineTension : 0,
+                data: User.purchase
+            });
+        }
+
+        this.renderChart(lineChart, lineChartOptions);
+    }
+}
+
 </script>

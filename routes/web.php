@@ -18,4 +18,5 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/getData', 'ApiController@index');
+Route::get('/getData/{user_id?}', 'ApiController@index');
+Route::get('/getUsers', 'ApiController@getUsers');
