@@ -1,8 +1,10 @@
 <script>
 
 import { Line } from 'vue-chartjs';
+import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
+import { SetTwo8 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.brewer';
 
-function makeRequest(method, url)
+function makeRequest(url)
 {
     return new Promise(function (resolve, reject)
     {
@@ -33,7 +35,7 @@ export default
         let Labels = new Array();
         let total = 0;
 
-        let data = await makeRequest("GET",uriData);
+        let data = await makeRequest(uriData);
     
         let Total = {};
         Total["name"] = "Total";
@@ -54,7 +56,7 @@ export default
 
         Users.push(Total)
 
-        let users = await makeRequest("GET", uriUsers);
+        let users = await makeRequest(uriUsers);
 
         for (var i = 0; i < users.length; i++)
         {
@@ -66,7 +68,7 @@ export default
             User["name"] = user.name;
             User["purchase"] = [];
 
-            let usersData = await makeRequest("GET", uriDataUser);
+            let usersData = await makeRequest(uriDataUser);
 
             let k=0;
             let total = 0;
@@ -102,9 +104,18 @@ export default
             datasets: []
         };
 
-        let lineChartOptions = {responsive: true, maintainAspectRatio: false};
-
-        console.log(Time);
+        let lineChartOptions = 
+        {
+            plugins: 
+            {
+                colorschemes: 
+                {
+                    scheme: SetTwo8
+                }
+            },
+            responsive: true, 
+            maintainAspectRatio: false
+        };
      
         for (var UserId in Users) 
         {
@@ -112,14 +123,8 @@ export default
             lineChart.datasets.push(
             {
                 label: User.name,
-                fillColor: 'rgba(220,220,220,0.2)',
-                strokeColor: 'rgba(220,220,220,1)',
-                pointColor: 'rgba(220,220,220,1)',
-                pointStrokeColor: '#fff',
-                pointHighlightFill: '#fff',
-                pointHighlightStroke:
-                'rgba(220,220,220,1)',
                 lineTension : 0,
+                fill: false,
                 data: User.purchase
             });
         }

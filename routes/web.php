@@ -20,3 +20,4 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/getData/{user_id?}', 'ApiController@index');
 Route::get('/getUsers', 'ApiController@getUsers');
+Route::get('/getSellers', 'ApiController@getSellers');

@@ -31,4 +31,12 @@ class ApiController extends Controller
 	                ->get();
 	    return response()->json($users);	
 	}
+
+	public function getSellers()
+	{
+		$sellers = \DB::table('sellers')
+	                ->select('id','name')
+	                ->get();
+	    return response()->json($sellers);	
+	}
 }
