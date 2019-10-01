@@ -24,7 +24,6 @@ Vue.use(VueAxios, axios);
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
 //Vue.component('example-component', require('./components/ExampleComponent.vue').default);
-Vue.component('purchase', require('./components/Purchase.vue').default);
 Vue.component('adddata', require('./components/AddData.vue').default);
 
 

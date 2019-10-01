@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Purchase;
 
 class ApiController extends Controller
 {
@@ -38,5 +40,22 @@ class ApiController extends Controller
 	                ->select('id','name')
 	                ->get();
 	    return response()->json($sellers);	
+	}
+
+	public function addPurchase(Request $request)
+	{
+		/*$this->validate($request, [
+        
+        ]);*/
+        
+		\DB::table('purchases')->insert(['user_id' => $request->user, 
+										'seller_id' => $request->seller, 
+										'date' => $request->date, 
+										'description' => $request->description, 
+										'share' => $request->share,
+										'amount' => $request->amount] );
+
+
+        return response()->json(null, 200);
 	}
 }

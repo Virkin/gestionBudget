@@ -46,12 +46,29 @@ export default
         {
             let row = data[i];
             
-            Time.push(row.date);
-            Labels.push(row.id);
+            let sameDate = -1;
 
             total += row.amount;
 
-            Total["purchase"].push(total) 
+            if(i<data.length-1)
+            {
+                let d1 = Date.parse(data[i].date);
+                let d2 = Date.parse(data[i+1].date);
+
+                if(d1 == d2)
+                {
+                    sameDate = 0;
+                }
+            }
+
+            if(sameDate != 0)
+            {
+                Time.push(row.date);
+                Total["purchase"].push(total)
+            }
+
+            Labels.push(row.id);
+            
         }
 
         Users.push(Total)
@@ -76,13 +93,33 @@ export default
             for (var j = 0; j < usersData.length; j++)
             {
                 let sameDate = usersData[j].date.localeCompare(data[k].date);
+                let sameDateUser = -1;
+
+                if(j<usersData.length-1)
+                {
+                    let d1 = Date.parse(usersData[j].date);
+                    let d2 = Date.parse(usersData[j+1].date);
+
+                    if(d1 == d2)
+                    {
+                        sameDateUser = 0;
+                    }
+                }
+
+                console.log(sameDateUser);
 
                 if(sameDate == 0)
                 {
                     total += usersData[j].amount;
                 }
-              
-                User["purchase"].push(total);
+
+                console.log(total);
+
+                if(sameDateUser != 0 || sameDate != 0)
+                {
+                    User["purchase"].push(total);
+                    console.log("push");
+                }
                 
                 if(k<data.length)
                 {

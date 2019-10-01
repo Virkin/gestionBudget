@@ -1852,12 +1852,16 @@ module.exports = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _Purchase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Purchase */ "./resources/js/components/Purchase.vue");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+//
+//
+//
 //
 //
 //
@@ -1938,6 +1942,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //import Datepicker from 'vuejs-datepicker';
 //$( "#datepicker" ).datepicker();
+
+
 function makeRequest(url) {
   return new Promise(function (resolve, reject) {
     axios.get(url).then(function (response) {
@@ -1952,6 +1958,7 @@ function makeRequest(url) {
 
 var Users = [];
 var Sellers = [];
+var componentKey = 0;
 
 var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-vue/es/main.js"),
     Octicon = _require.Octicon,
@@ -2010,12 +2017,36 @@ var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-
     return {
       Octicons: Octicons,
       users: Users,
-      sellers: Sellers
+      sellers: Sellers,
+      fields: {},
+      errors: {},
+      componentKey: componentKey
     };
   },
   components: {
     //Datepicker,
-    Octicon: Octicon
+    Octicon: Octicon,
+    purchase: _Purchase__WEBPACK_IMPORTED_MODULE_1__["default"]
+  },
+  methods: {
+    forceRerender: function forceRerender() {
+      this.componentKey += 1;
+    },
+    submit: function submit() {
+      var _this = this;
+
+      this.errors = {};
+      axios.post('http://127.0.0.1:8000/submitPurchase', this.fields).then(function (response) {
+        //alert('Message sent!');
+        _this.forceRerender();
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this.errors = error.response.data.errors || {};
+        }
+
+        console.log(error);
+      });
+    }
   }
 });
 
@@ -2063,7 +2094,7 @@ function makeRequest(url) {
     var _mounted = _asyncToGenerator(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-      var uriData, uriUsers, Users, Time, Labels, total, data, Total, i, row, users, user, uriDataUser, User, usersData, k, _total, j, sameDate, lineChart, lineChartOptions, UserId, _User;
+      var uriData, uriUsers, Users, Time, Labels, total, data, Total, i, row, sameDate, d1, d2, users, user, uriDataUser, User, usersData, k, _total, j, _sameDate, sameDateUser, _d, _d2, lineChart, lineChartOptions, UserId, _User;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
@@ -2086,10 +2117,24 @@ function makeRequest(url) {
 
               for (i = 0; i < data.length; i++) {
                 row = data[i];
-                Time.push(row.date);
-                Labels.push(row.id);
+                sameDate = -1;
                 total += row.amount;
-                Total["purchase"].push(total);
+
+                if (i < data.length - 1) {
+                  d1 = Date.parse(data[i].date);
+                  d2 = Date.parse(data[i + 1].date);
+
+                  if (d1 == d2) {
+                    sameDate = 0;
+                  }
+                }
+
+                if (sameDate != 0) {
+                  Time.push(row.date);
+                  Total["purchase"].push(total);
+                }
+
+                Labels.push(row.id);
               }
 
               Users.push(Total);
@@ -2120,19 +2165,36 @@ function makeRequest(url) {
               _total = 0;
 
               for (j = 0; j < usersData.length; j++) {
-                sameDate = usersData[j].date.localeCompare(data[k].date);
+                _sameDate = usersData[j].date.localeCompare(data[k].date);
+                sameDateUser = -1;
 
-                if (sameDate == 0) {
+                if (j < usersData.length - 1) {
+                  _d = Date.parse(usersData[j].date);
+                  _d2 = Date.parse(usersData[j + 1].date);
+
+                  if (_d == _d2) {
+                    sameDateUser = 0;
+                  }
+                }
+
+                console.log(sameDateUser);
+
+                if (_sameDate == 0) {
                   _total += usersData[j].amount;
                 }
 
-                User["purchase"].push(_total);
+                console.log(_total);
+
+                if (sameDateUser != 0 || _sameDate != 0) {
+                  User["purchase"].push(_total);
+                  console.log("push");
+                }
 
                 if (k < data.length) {
                   k++;
                 }
 
-                if ((sameDate != 0 || j == usersData.length - 1) && k < data.length) {
+                if ((_sameDate != 0 || j == usersData.length - 1) && k < data.length) {
                   j--;
                 }
               }
@@ -76572,186 +76634,372 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("form", [
-    _c("div", { staticClass: "form-group row justify-content-center" }, [
-      _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-        _c("div", { staticClass: "input-group" }, [
-          _c("div", { staticClass: "input-group-prepend" }, [
-            _c(
-              "div",
-              { staticClass: "input-group-text" },
-              [_c("Octicon", { attrs: { icon: _vm.Octicons.person } })],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c(
-            "select",
-            { staticClass: "custom-select", attrs: { id: "selectUser" } },
-            [
-              _c(
-                "option",
-                {
-                  attrs: { value: "", disabled: "", selected: "", hidden: "" }
-                },
-                [_vm._v("User...")]
-              ),
-              _vm._v(" "),
-              _vm._l(_vm.users, function(user) {
-                return _c("option", { domProps: { value: user.value } }, [
-                  _vm._v(
-                    "\n\t\t\t                    " +
-                      _vm._s(user.text) +
-                      "\n\t\t\t                "
-                  )
-                ])
-              })
-            ],
-            2
-          )
-        ])
-      ]),
+  return _c(
+    "div",
+    { staticClass: "container" },
+    [
+      _c("purchase", { key: _vm.componentKey }),
       _vm._v(" "),
-      _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-        _c("div", { staticClass: "input-group" }, [
-          _c("div", { staticClass: "input-group-prepend" }, [
-            _c(
-              "div",
-              { staticClass: "input-group-text" },
-              [_c("Octicon", { attrs: { icon: _vm.Octicons.ruby } })],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c(
-            "select",
-            {
-              staticClass: "custom-select",
-              attrs: { id: "selectSellers", name: "test" }
-            },
-            [
-              _c(
-                "option",
-                {
-                  attrs: { value: "", disabled: "", selected: "", hidden: "" }
-                },
-                [_vm._v("Seller...")]
-              ),
-              _vm._v(" "),
-              _vm._l(_vm.sellers, function(seller) {
-                return _c("option", { domProps: { value: seller.value } }, [
-                  _vm._v(
-                    "\n\t\t\t                    " +
-                      _vm._s(seller.text) +
-                      "\n\t\t\t                "
-                  )
-                ])
-              })
-            ],
-            2
-          )
-        ])
-      ])
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group row justify-content-center" }, [
-      _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-        _c("div", { staticClass: "input-group" }, [
-          _c("div", { staticClass: "input-group-prepend" }, [
-            _c(
-              "div",
-              { staticClass: "input-group-text" },
-              [_c("Octicon", { attrs: { icon: _vm.Octicons.calendar } })],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: { type: "date", id: "datepicker", placeholder: "Date..." }
-          })
-        ])
-      ]),
-      _vm._v(" "),
-      _vm._m(0)
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group row justify-content-center" }, [
-      _c("div", { staticClass: "col-sm-12 col-md-8 col-lg-6" }, [
-        _c("div", { staticClass: "input-group" }, [
-          _c("div", { staticClass: "input-group-prepend" }, [
-            _c(
-              "div",
-              { staticClass: "input-group-text" },
-              [_c("Octicon", { attrs: { icon: _vm.Octicons.tag } })],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: {
-              type: "text",
-              id: "inlineFormInputName2",
-              placeholder: "Desciption (optional)"
+      _c(
+        "form",
+        {
+          on: {
+            submit: function($event) {
+              $event.preventDefault()
+              return _vm.submit($event)
             }
-          })
-        ])
-      ])
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group row justify-content-center" }, [
-      _vm._m(1),
-      _vm._v(" "),
-      _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-        _c(
-          "button",
-          { staticClass: "btn btn-primary", attrs: { type: "submit" } },
-          [_c("center", [_vm._v("Submit purchase")])],
-          1
-        )
-      ])
-    ])
-  ])
+          }
+        },
+        [
+          _c("div", { staticClass: "form-group row justify-content-center" }, [
+            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
+              _c("div", { staticClass: "input-group" }, [
+                _c("div", { staticClass: "input-group-prepend" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group-text" },
+                    [_c("Octicon", { attrs: { icon: _vm.Octicons.person } })],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.fields.user,
+                        expression: "fields.user"
+                      }
+                    ],
+                    staticClass: "custom-select",
+                    attrs: { id: "selectUser" },
+                    on: {
+                      change: function($event) {
+                        var $$selectedVal = Array.prototype.filter
+                          .call($event.target.options, function(o) {
+                            return o.selected
+                          })
+                          .map(function(o) {
+                            var val = "_value" in o ? o._value : o.value
+                            return val
+                          })
+                        _vm.$set(
+                          _vm.fields,
+                          "user",
+                          $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        )
+                      }
+                    }
+                  },
+                  [
+                    _c(
+                      "option",
+                      {
+                        attrs: {
+                          value: "",
+                          disabled: "",
+                          selected: "",
+                          hidden: ""
+                        }
+                      },
+                      [_vm._v("User...")]
+                    ),
+                    _vm._v(" "),
+                    _vm._l(_vm.users, function(user) {
+                      return _c("option", { domProps: { value: user.value } }, [
+                        _vm._v(
+                          "\n\t\t\t                    " +
+                            _vm._s(user.text) +
+                            "\n\t\t\t                "
+                        )
+                      ])
+                    })
+                  ],
+                  2
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
+              _c("div", { staticClass: "input-group" }, [
+                _c("div", { staticClass: "input-group-prepend" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group-text" },
+                    [_c("Octicon", { attrs: { icon: _vm.Octicons.ruby } })],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.fields.seller,
+                        expression: "fields.seller"
+                      }
+                    ],
+                    staticClass: "custom-select",
+                    attrs: { id: "selectSellers" },
+                    on: {
+                      change: function($event) {
+                        var $$selectedVal = Array.prototype.filter
+                          .call($event.target.options, function(o) {
+                            return o.selected
+                          })
+                          .map(function(o) {
+                            var val = "_value" in o ? o._value : o.value
+                            return val
+                          })
+                        _vm.$set(
+                          _vm.fields,
+                          "seller",
+                          $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        )
+                      }
+                    }
+                  },
+                  [
+                    _c(
+                      "option",
+                      {
+                        attrs: {
+                          value: "",
+                          disabled: "",
+                          selected: "",
+                          hidden: ""
+                        }
+                      },
+                      [_vm._v("Seller...")]
+                    ),
+                    _vm._v(" "),
+                    _vm._l(_vm.sellers, function(seller) {
+                      return _c(
+                        "option",
+                        { domProps: { value: seller.value } },
+                        [
+                          _vm._v(
+                            "\n\t\t\t                    " +
+                              _vm._s(seller.text) +
+                              "\n\t\t\t                "
+                          )
+                        ]
+                      )
+                    })
+                  ],
+                  2
+                )
+              ])
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group row justify-content-center" }, [
+            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
+              _c("div", { staticClass: "input-group" }, [
+                _c("div", { staticClass: "input-group-prepend" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group-text" },
+                    [_c("Octicon", { attrs: { icon: _vm.Octicons.calendar } })],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.fields.date,
+                      expression: "fields.date"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: {
+                    type: "date",
+                    id: "datepicker",
+                    placeholder: "Date..."
+                  },
+                  domProps: { value: _vm.fields.date },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.fields, "date", $event.target.value)
+                    }
+                  }
+                })
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
+              _c("div", { staticClass: "input-group" }, [
+                _vm._m(0),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.fields.amount,
+                      expression: "fields.amount"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: {
+                    type: "number",
+                    min: "0",
+                    step: "0.01",
+                    placeholder: "Amount..."
+                  },
+                  domProps: { value: _vm.fields.amount },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.fields, "amount", $event.target.value)
+                    }
+                  }
+                })
+              ])
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group row justify-content-center" }, [
+            _c("div", { staticClass: "col-sm-12 col-md-8 col-lg-6" }, [
+              _c("div", { staticClass: "input-group" }, [
+                _c("div", { staticClass: "input-group-prepend" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group-text" },
+                    [_c("Octicon", { attrs: { icon: _vm.Octicons.tag } })],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.fields.description,
+                      expression: "fields.description"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: {
+                    type: "text",
+                    id: "inlineFormInputName2",
+                    placeholder: "Desciption (optional)"
+                  },
+                  domProps: { value: _vm.fields.description },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.fields, "description", $event.target.value)
+                    }
+                  }
+                })
+              ])
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group row justify-content-center" }, [
+            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
+              _c(
+                "div",
+                { staticClass: "input-group custom-control custom-checkbox" },
+                [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.fields.share,
+                        expression: "fields.share"
+                      }
+                    ],
+                    staticClass: "custom-control-input",
+                    attrs: { type: "checkbox", id: "customCheck1" },
+                    domProps: {
+                      checked: Array.isArray(_vm.fields.share)
+                        ? _vm._i(_vm.fields.share, null) > -1
+                        : _vm.fields.share
+                    },
+                    on: {
+                      change: function($event) {
+                        var $$a = _vm.fields.share,
+                          $$el = $event.target,
+                          $$c = $$el.checked ? true : false
+                        if (Array.isArray($$a)) {
+                          var $$v = null,
+                            $$i = _vm._i($$a, $$v)
+                          if ($$el.checked) {
+                            $$i < 0 &&
+                              _vm.$set(_vm.fields, "share", $$a.concat([$$v]))
+                          } else {
+                            $$i > -1 &&
+                              _vm.$set(
+                                _vm.fields,
+                                "share",
+                                $$a.slice(0, $$i).concat($$a.slice($$i + 1))
+                              )
+                          }
+                        } else {
+                          _vm.$set(_vm.fields, "share", $$c)
+                        }
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "label",
+                    {
+                      staticClass: "custom-control-label",
+                      attrs: { for: "customCheck1" }
+                    },
+                    [_vm._v("Share")]
+                  )
+                ]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
+              _c(
+                "button",
+                { staticClass: "btn btn-primary", attrs: { type: "submit" } },
+                [_c("center", [_vm._v("Submit purchase")])],
+                1
+              )
+            ])
+          ])
+        ]
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-      _c("div", { staticClass: "input-group" }, [
-        _c("div", { staticClass: "input-group-prepend" }, [
-          _c("div", { staticClass: "input-group-text" }, [_vm._v("$")])
-        ]),
-        _vm._v(" "),
-        _c("input", {
-          staticClass: "form-control",
-          attrs: { type: "number", min: "0", placeholder: "Amount..." }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-      _c("div", { staticClass: "input-group custom-control custom-checkbox" }, [
-        _c("input", {
-          staticClass: "custom-control-input",
-          attrs: { type: "checkbox", id: "customCheck1" }
-        }),
-        _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass: "custom-control-label",
-            attrs: { for: "customCheck1" }
-          },
-          [_vm._v("Share")]
-        )
-      ])
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c("div", { staticClass: "input-group-text" }, [_vm._v("$")])
     ])
   }
 ]
@@ -88933,7 +89181,6 @@ Vue.use(vue_axios__WEBPACK_IMPORTED_MODULE_0___default.a, axios__WEBPACK_IMPORTE
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 //Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
-Vue.component('purchase', __webpack_require__(/*! ./components/Purchase.vue */ "./resources/js/components/Purchase.vue")["default"]);
 Vue.component('adddata', __webpack_require__(/*! ./components/AddData.vue */ "./resources/js/components/AddData.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to

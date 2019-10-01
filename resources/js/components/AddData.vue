@@ -1,12 +1,14 @@
 <template>
-		<form>
+	<div class="container">
+		<purchase :key="componentKey"></purchase>
+		<form @submit.prevent="submit">
 	        <div class="form-group row justify-content-center">
 	        	<div class="col-12 col-sm-6 col-md-4 col-lg-3">
 	        		<div class="input-group">
 			            <div class="input-group-prepend">
 		          			<div class="input-group-text"><Octicon :icon="Octicons.person" /></div>
 		        		</div>
-			            <select class="custom-select" id="selectUser">
+			            <select v-model="fields.user" class="custom-select" id="selectUser">
 			                <option value="" disabled selected hidden>User...</option>
 			                <option v-for="user in users" v-bind:value="user.value">
 			                    {{ user.text }}
@@ -20,7 +22,7 @@
 			            <div class="input-group-prepend">
 		          			<div class="input-group-text"><Octicon :icon="Octicons.ruby" /></div>
 			        	</div>
-			            <select class="custom-select" id="selectSellers" name="test">
+			            <select v-model="fields.seller" class="custom-select" id="selectSellers">
 			                <option value="" disabled selected hidden>Seller...</option>
 			                <option v-for="seller in sellers" v-bind:value="seller.value">
 			                    {{ seller.text }}
@@ -36,7 +38,7 @@
 	        			<div class="input-group-prepend">
 		          			<div class="input-group-text"><Octicon :icon="Octicons.calendar" /></div>
 			        	</div>
-	        			<input class="form-control" type="date" id="datepicker" placeholder="Date...">
+	        			<input v-model="fields.date" class="form-control" type="date" id="datepicker" placeholder="Date...">
 	        		</div>
 	        	</div>
 	        	<div class="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -44,7 +46,7 @@
 	        			<div class="input-group-prepend">
 		          			<div class="input-group-text">$</div>
 			        	</div>
-	        		 	<input class="form-control" type="number" min="0" placeholder="Amount...">
+	        		 	<input v-model="fields.amount" class="form-control" type="number" min="0" step="0.01" placeholder="Amount...">
 	        		</div>
 	        	</div>
         	</div>
@@ -55,7 +57,7 @@
 	        			<div class="input-group-prepend">
 		          			<div class="input-group-text"><Octicon :icon="Octicons.tag" /></div>
 			        	</div>
-	        		 	<input type="text" class="form-control" id="inlineFormInputName2" placeholder="Desciption (optional)">
+	        		 	<input v-model="fields.description" type="text" class="form-control" id="inlineFormInputName2" placeholder="Desciption (optional)">
 	        		</div>
 	        	</div>
         	</div>
@@ -63,7 +65,7 @@
         	<div class="form-group row justify-content-center">
         		<div class="col-12 col-sm-6 col-md-4 col-lg-3">
 	        		<div class="input-group custom-control custom-checkbox">
-	        			<input type="checkbox" class="custom-control-input" id="customCheck1">
+	        			<input v-model="fields.share" type="checkbox" class="custom-control-input" id="customCheck1">
 	  					<label class="custom-control-label" for="customCheck1">Share</label>
 	        		</div>
 	        	</div>
@@ -74,6 +76,7 @@
         	</div>
 	        
 	    </form>
+	</div>
 </template>
 
 <script>
@@ -81,6 +84,7 @@
 	//import Datepicker from 'vuejs-datepicker';
 
    	//$( "#datepicker" ).datepicker();
+   	import purchase from './Purchase'
 
     function makeRequest(url)
 	{
@@ -101,7 +105,7 @@
 
     let Users = [];
 	let Sellers = [];
-
+	let componentKey = 0;
 	const { Octicon, Octicons } = require('octicons-vue')
 
     export default 
@@ -134,14 +138,36 @@
 			{
                 Octicons: Octicons,
                 users: Users,
-                sellers: Sellers
+                sellers: Sellers,
+                fields: {},
+      			errors: {},
+      			componentKey
             });
         },
 
         components: {
   			//Datepicker,
-  			Octicon
-  		}
+  			Octicon,
+  			purchase
+  		},
+
+  		methods: {
+		    forceRerender() {
+      			this.componentKey += 1;  
+    		},
+		    submit() {
+		      this.errors = {};
+		      axios.post('http://127.0.0.1:8000/submitPurchase', this.fields).then(response => {
+		        //alert('Message sent!');
+		        this.forceRerender();
+		      }).catch(error => {
+		        if (error.response.status === 422) {
+		          this.errors = error.response.data.errors || {};
+		        }
+		        console.log(error);
+		      });
+		    },
+		  },
     }
     	
 </script>
