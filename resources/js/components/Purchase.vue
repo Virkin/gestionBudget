@@ -31,8 +31,6 @@ export default
 
         let Users = [];
 
-        let Time = new Array();
-        let Labels = new Array();
         let total = 0;
 
         let data = await makeRequest(uriData);
@@ -63,12 +61,11 @@ export default
 
             if(sameDate != 0)
             {
-                Time.push(row.date);
-                Total["purchase"].push(total)
+                let purchase = {};
+                purchase.x = data[i].date;
+                purchase.y = total
+                Total["purchase"].push(purchase)
             }
-
-            Labels.push(row.id);
-            
         }
 
         Users.push(Total)
@@ -92,8 +89,9 @@ export default
 
             for (var j = 0; j < usersData.length; j++)
             {
-                let sameDate = usersData[j].date.localeCompare(data[k].date);
-                let sameDateUser = -1;
+                let sameDate = -1;
+
+                total += usersData[j].amount;
 
                 if(j<usersData.length-1)
                 {
@@ -102,33 +100,16 @@ export default
 
                     if(d1 == d2)
                     {
-                        sameDateUser = 0;
+                        sameDate = 0;
                     }
                 }
 
-                console.log(sameDateUser);
-
-                if(sameDate == 0)
+                if(sameDate != 0)
                 {
-                    total += usersData[j].amount;
-                }
-
-                console.log(total);
-
-                if(sameDateUser != 0 || sameDate != 0)
-                {
-                    User["purchase"].push(total);
-                    console.log("push");
-                }
-                
-                if(k<data.length)
-                {
-                    k++;
-                }
-
-                if((sameDate != 0 || j==usersData.length-1) && k<data.length)
-                {
-                    j--;
+                    let purchase = {};
+                    purchase.x = usersData[j].date;
+                    purchase.y = total
+                    User["purchase"].push(purchase);
                 }
             }
 
@@ -137,12 +118,19 @@ export default
         
         let lineChart =  
         {
-            labels: Time,
             datasets: []
         };
 
         let lineChartOptions = 
         {
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'month'
+                    }
+                }]
+            },
             plugins: 
             {
                 colorschemes: 
@@ -157,6 +145,7 @@ export default
         for (var UserId in Users) 
         {
             let User = Users[UserId]
+            console.log(User)
             lineChart.datasets.push(
             {
                 label: User.name,

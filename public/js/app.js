@@ -2094,7 +2094,7 @@ function makeRequest(url) {
     var _mounted = _asyncToGenerator(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-      var uriData, uriUsers, Users, Time, Labels, total, data, Total, i, row, sameDate, d1, d2, users, user, uriDataUser, User, usersData, k, _total, j, _sameDate, sameDateUser, _d, _d2, lineChart, lineChartOptions, UserId, _User;
+      var uriData, uriUsers, Users, total, data, Total, i, row, sameDate, d1, d2, purchase, users, user, uriDataUser, User, usersData, k, _total, j, _sameDate, _d, _d2, _purchase, lineChart, lineChartOptions, UserId, _User;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
@@ -2103,13 +2103,11 @@ function makeRequest(url) {
               uriData = 'http://127.0.0.1:8000/getData';
               uriUsers = 'http://127.0.0.1:8000/getUsers';
               Users = [];
-              Time = new Array();
-              Labels = new Array();
               total = 0;
-              _context.next = 8;
+              _context.next = 6;
               return makeRequest(uriData);
 
-            case 8:
+            case 6:
               data = _context.sent;
               Total = {};
               Total["name"] = "Total";
@@ -2130,24 +2128,24 @@ function makeRequest(url) {
                 }
 
                 if (sameDate != 0) {
-                  Time.push(row.date);
-                  Total["purchase"].push(total);
+                  purchase = {};
+                  purchase.x = data[i].date;
+                  purchase.y = total;
+                  Total["purchase"].push(purchase);
                 }
-
-                Labels.push(row.id);
               }
 
               Users.push(Total);
-              _context.next = 16;
+              _context.next = 14;
               return makeRequest(uriUsers);
 
-            case 16:
+            case 14:
               users = _context.sent;
               i = 0;
 
-            case 18:
+            case 16:
               if (!(i < users.length)) {
-                _context.next = 34;
+                _context.next = 32;
                 break;
               }
 
@@ -2156,62 +2154,55 @@ function makeRequest(url) {
               User = {};
               User["name"] = user.name;
               User["purchase"] = [];
-              _context.next = 26;
+              _context.next = 24;
               return makeRequest(uriDataUser);
 
-            case 26:
+            case 24:
               usersData = _context.sent;
               k = 0;
               _total = 0;
 
               for (j = 0; j < usersData.length; j++) {
-                _sameDate = usersData[j].date.localeCompare(data[k].date);
-                sameDateUser = -1;
+                _sameDate = -1;
+                _total += usersData[j].amount;
 
                 if (j < usersData.length - 1) {
                   _d = Date.parse(usersData[j].date);
                   _d2 = Date.parse(usersData[j + 1].date);
 
                   if (_d == _d2) {
-                    sameDateUser = 0;
+                    _sameDate = 0;
                   }
                 }
 
-                console.log(sameDateUser);
-
-                if (_sameDate == 0) {
-                  _total += usersData[j].amount;
-                }
-
-                console.log(_total);
-
-                if (sameDateUser != 0 || _sameDate != 0) {
-                  User["purchase"].push(_total);
-                  console.log("push");
-                }
-
-                if (k < data.length) {
-                  k++;
-                }
-
-                if ((_sameDate != 0 || j == usersData.length - 1) && k < data.length) {
-                  j--;
+                if (_sameDate != 0) {
+                  _purchase = {};
+                  _purchase.x = usersData[j].date;
+                  _purchase.y = _total;
+                  User["purchase"].push(_purchase);
                 }
               }
 
               Users.push(User);
 
-            case 31:
+            case 29:
               i++;
-              _context.next = 18;
+              _context.next = 16;
               break;
 
-            case 34:
+            case 32:
               lineChart = {
-                labels: Time,
                 datasets: []
               };
               lineChartOptions = {
+                scales: {
+                  xAxes: [{
+                    type: 'time',
+                    time: {
+                      unit: 'month'
+                    }
+                  }]
+                },
                 plugins: {
                   colorschemes: {
                     scheme: chartjs_plugin_colorschemes_src_colorschemes_colorschemes_brewer__WEBPACK_IMPORTED_MODULE_3__["SetTwo8"]
@@ -2223,6 +2214,7 @@ function makeRequest(url) {
 
               for (UserId in Users) {
                 _User = Users[UserId];
+                console.log(_User);
                 lineChart.datasets.push({
                   label: _User.name,
                   lineTension: 0,
@@ -2233,7 +2225,7 @@ function makeRequest(url) {
 
               this.renderChart(lineChart, lineChartOptions);
 
-            case 38:
+            case 36:
             case "end":
               return _context.stop();
           }
