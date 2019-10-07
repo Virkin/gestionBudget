@@ -21,4 +21,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/getData/{user_id?}', 'ApiController@index');
 Route::get('/getUsers', 'ApiController@getUsers');
 Route::get('/getSellers', 'ApiController@getSellers');
+Route::get('/getCities', 'ApiController@getCities');
+Route::get('/getCountries', 'ApiController@getCountries');
 Route::post('/submitPurchase', 'ApiController@addPurchase');
+Route::post('/submitSeller', 'ApiController@addSeller');

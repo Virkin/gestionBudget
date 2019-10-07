@@ -1940,9 +1940,108 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //import Datepicker from 'vuejs-datepicker';
 //$( "#datepicker" ).datepicker();
 
+
+function sleep(ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms);
+  });
+}
+
+function jsonToOptions(json, list) {
+  var data = json;
+
+  for (var i = 0; i < data.length; i++) {
+    var elm = {};
+    elm["text"] = data[i].name;
+    elm["value"] = data[i].id;
+    list.push(elm);
+  }
+}
 
 function makeRequest(url) {
   return new Promise(function (resolve, reject) {
@@ -1956,20 +2055,22 @@ function makeRequest(url) {
   });
 }
 
-var Users = [];
-var Sellers = [];
 var componentKey = 0;
 
 var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-vue/es/main.js"),
     Octicon = _require.Octicon,
     Octicons = _require.Octicons;
 
+var Users = [];
+var Sellers = [];
+var Cities = [];
+var Countries = [];
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function () {
     var _mounted = _asyncToGenerator(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-      var usersData, sellersData, i, user, seller;
+      var UsersData, SellersData, CitiesData, CountriesData;
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -1978,28 +2079,28 @@ var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-
               return makeRequest('http://127.0.0.1:8000/getUsers');
 
             case 2:
-              usersData = _context.sent;
+              UsersData = _context.sent;
               _context.next = 5;
               return makeRequest('http://127.0.0.1:8000/getSellers');
 
             case 5:
-              sellersData = _context.sent;
-
-              for (i = 0; i < usersData.length; i++) {
-                user = {};
-                user["text"] = usersData[i].name;
-                user["value"] = usersData[i].id;
-                Users.push(user);
-              }
-
-              for (i = 0; i < sellersData.length; i++) {
-                seller = {};
-                seller["text"] = sellersData[i].name;
-                seller["value"] = sellersData[i].id;
-                Sellers.push(seller);
-              }
+              SellersData = _context.sent;
+              _context.next = 8;
+              return makeRequest('http://127.0.0.1:8000/getCities');
 
             case 8:
+              CitiesData = _context.sent;
+              _context.next = 11;
+              return makeRequest('http://127.0.0.1:8000/getCountries');
+
+            case 11:
+              CountriesData = _context.sent;
+              jsonToOptions(UsersData, Users);
+              jsonToOptions(SellersData, Sellers);
+              jsonToOptions(CitiesData, Cities);
+              jsonToOptions(CountriesData, Countries);
+
+            case 16:
             case "end":
               return _context.stop();
           }
@@ -2018,6 +2119,8 @@ var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-
       Octicons: Octicons,
       users: Users,
       sellers: Sellers,
+      cities: Cities,
+      countries: Countries,
       fields: {},
       errors: {},
       componentKey: componentKey
@@ -2032,7 +2135,51 @@ var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-
     forceRerender: function forceRerender() {
       this.componentKey += 1;
     },
-    submit: function submit() {
+    flipForm: function () {
+      var _flipForm = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (!(document.getElementById("flip-card-front").style.visibility == "hidden")) {
+                  _context2.next = 7;
+                  break;
+                }
+
+                document.getElementById("flip-card-inner").style.transform = "none";
+                _context2.next = 4;
+                return sleep(400);
+
+              case 4:
+                document.getElementById("flip-card-front").style.visibility = "visible";
+                _context2.next = 11;
+                break;
+
+              case 7:
+                document.getElementById("flip-card-inner").style.transform = "rotateY(180deg)";
+                _context2.next = 10;
+                return sleep(400);
+
+              case 10:
+                document.getElementById("flip-card-front").style.visibility = "hidden";
+
+              case 11:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      function flipForm() {
+        return _flipForm.apply(this, arguments);
+      }
+
+      return flipForm;
+    }(),
+    submitPurchase: function submitPurchase() {
       var _this = this;
 
       this.errors = {};
@@ -2042,6 +2189,23 @@ var _require = __webpack_require__(/*! octicons-vue */ "./node_modules/octicons-
       })["catch"](function (error) {
         if (error.response.status === 422) {
           _this.errors = error.response.data.errors || {};
+        }
+
+        console.log(error);
+      });
+    },
+    submitSeller: function submitSeller() {
+      var _this2 = this;
+
+      this.errors = {};
+      axios.post('http://127.0.0.1:8000/submitSeller', this.fields).then(function (response) {
+        //alert('Message sent!');
+        _this2.forceRerender();
+
+        _this2.flipForm();
+      })["catch"](function (error) {
+        if (error.response.status === 422) {
+          _this2.errors = error.response.data.errors || {};
         }
 
         console.log(error);
@@ -76632,355 +76796,938 @@ var render = function() {
     [
       _c("purchase", { key: _vm.componentKey }),
       _vm._v(" "),
-      _c(
-        "form",
-        {
-          on: {
-            submit: function($event) {
-              $event.preventDefault()
-              return _vm.submit($event)
-            }
-          }
-        },
-        [
-          _c("div", { staticClass: "form-group row justify-content-center" }, [
-            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-              _c("div", { staticClass: "input-group" }, [
-                _c("div", { staticClass: "input-group-prepend" }, [
-                  _c(
-                    "div",
-                    { staticClass: "input-group-text" },
-                    [_c("Octicon", { attrs: { icon: _vm.Octicons.person } })],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
+      _c("div", { staticClass: "flip-card" }, [
+        _c(
+          "div",
+          { staticClass: "flip-card-inner", attrs: { id: "flip-card-inner" } },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "flip-card-front",
+                attrs: { id: "flip-card-front" }
+              },
+              [
                 _c(
-                  "select",
+                  "form",
                   {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.fields.user,
-                        expression: "fields.user"
-                      }
-                    ],
-                    staticClass: "custom-select",
-                    attrs: { id: "selectUser" },
                     on: {
-                      change: function($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function(o) {
-                            return o.selected
-                          })
-                          .map(function(o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.$set(
-                          _vm.fields,
-                          "user",
-                          $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
-                        )
+                      submit: function($event) {
+                        $event.preventDefault()
+                        return _vm.submitPurchase($event)
                       }
                     }
                   },
                   [
                     _c(
-                      "option",
-                      {
-                        attrs: {
-                          value: "",
-                          disabled: "",
-                          selected: "",
-                          hidden: ""
-                        }
-                      },
-                      [_vm._v("User...")]
-                    ),
-                    _vm._v(" "),
-                    _vm._l(_vm.users, function(user) {
-                      return _c("option", { domProps: { value: user.value } }, [
-                        _vm._v(
-                          "\n\t\t\t                    " +
-                            _vm._s(user.text) +
-                            "\n\t\t\t                "
-                        )
-                      ])
-                    })
-                  ],
-                  2
-                )
-              ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-              _c("div", { staticClass: "input-group" }, [
-                _c("div", { staticClass: "input-group-prepend" }, [
-                  _c(
-                    "div",
-                    { staticClass: "input-group-text" },
-                    [_c("Octicon", { attrs: { icon: _vm.Octicons.ruby } })],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.fields.seller,
-                        expression: "fields.seller"
-                      }
-                    ],
-                    staticClass: "custom-select",
-                    attrs: { id: "selectSellers" },
-                    on: {
-                      change: function($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function(o) {
-                            return o.selected
-                          })
-                          .map(function(o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.$set(
-                          _vm.fields,
-                          "seller",
-                          $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
-                        )
-                      }
-                    }
-                  },
-                  [
-                    _c(
-                      "option",
-                      {
-                        attrs: {
-                          value: "",
-                          disabled: "",
-                          selected: "",
-                          hidden: ""
-                        }
-                      },
-                      [_vm._v("Seller...")]
-                    ),
-                    _vm._v(" "),
-                    _vm._l(_vm.sellers, function(seller) {
-                      return _c(
-                        "option",
-                        { domProps: { value: seller.value } },
-                        [
-                          _vm._v(
-                            "\n\t\t\t                    " +
-                              _vm._s(seller.text) +
-                              "\n\t\t\t                "
-                          )
-                        ]
-                      )
-                    })
-                  ],
-                  2
-                )
-              ])
-            ])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group row justify-content-center" }, [
-            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-              _c("div", { staticClass: "input-group" }, [
-                _c("div", { staticClass: "input-group-prepend" }, [
-                  _c(
-                    "div",
-                    { staticClass: "input-group-text" },
-                    [_c("Octicon", { attrs: { icon: _vm.Octicons.calendar } })],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.fields.date,
-                      expression: "fields.date"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    type: "date",
-                    id: "datepicker",
-                    placeholder: "Date..."
-                  },
-                  domProps: { value: _vm.fields.date },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.fields, "date", $event.target.value)
-                    }
-                  }
-                })
-              ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-              _c("div", { staticClass: "input-group" }, [
-                _vm._m(0),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.fields.amount,
-                      expression: "fields.amount"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    type: "number",
-                    min: "0",
-                    step: "0.01",
-                    placeholder: "Amount..."
-                  },
-                  domProps: { value: _vm.fields.amount },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.fields, "amount", $event.target.value)
-                    }
-                  }
-                })
-              ])
-            ])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group row justify-content-center" }, [
-            _c("div", { staticClass: "col-sm-12 col-md-8 col-lg-6" }, [
-              _c("div", { staticClass: "input-group" }, [
-                _c("div", { staticClass: "input-group-prepend" }, [
-                  _c(
-                    "div",
-                    { staticClass: "input-group-text" },
-                    [_c("Octicon", { attrs: { icon: _vm.Octicons.tag } })],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.fields.description,
-                      expression: "fields.description"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    type: "text",
-                    id: "inlineFormInputName2",
-                    placeholder: "Desciption (optional)"
-                  },
-                  domProps: { value: _vm.fields.description },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.fields, "description", $event.target.value)
-                    }
-                  }
-                })
-              ])
-            ])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group row justify-content-center" }, [
-            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-              _c(
-                "div",
-                { staticClass: "input-group custom-control custom-checkbox" },
-                [
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.fields.share,
-                        expression: "fields.share"
-                      }
-                    ],
-                    staticClass: "custom-control-input",
-                    attrs: { type: "checkbox", id: "customCheck1" },
-                    domProps: {
-                      checked: Array.isArray(_vm.fields.share)
-                        ? _vm._i(_vm.fields.share, null) > -1
-                        : _vm.fields.share
-                    },
-                    on: {
-                      change: function($event) {
-                        var $$a = _vm.fields.share,
-                          $$el = $event.target,
-                          $$c = $$el.checked ? true : false
-                        if (Array.isArray($$a)) {
-                          var $$v = null,
-                            $$i = _vm._i($$a, $$v)
-                          if ($$el.checked) {
-                            $$i < 0 &&
-                              _vm.$set(_vm.fields, "share", $$a.concat([$$v]))
-                          } else {
-                            $$i > -1 &&
-                              _vm.$set(
-                                _vm.fields,
-                                "share",
-                                $$a.slice(0, $$i).concat($$a.slice($$i + 1))
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.person }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.fields.user,
+                                      expression: "fields.user"
+                                    }
+                                  ],
+                                  staticClass: "custom-select",
+                                  attrs: { id: "selectUser" },
+                                  on: {
+                                    change: function($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call($event.target.options, function(
+                                          o
+                                        ) {
+                                          return o.selected
+                                        })
+                                        .map(function(o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        _vm.fields,
+                                        "user",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    }
+                                  }
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    {
+                                      attrs: {
+                                        value: "",
+                                        disabled: "",
+                                        selected: "",
+                                        hidden: ""
+                                      }
+                                    },
+                                    [_vm._v("User...")]
+                                  ),
+                                  _vm._v(" "),
+                                  _vm._l(_vm.users, function(user) {
+                                    return _c(
+                                      "option",
+                                      { domProps: { value: user.value } },
+                                      [
+                                        _vm._v(
+                                          "\n\t\t\t\t\t                    " +
+                                            _vm._s(user.text) +
+                                            "\n\t\t\t\t\t                "
+                                        )
+                                      ]
+                                    )
+                                  })
+                                ],
+                                2
                               )
-                          }
-                        } else {
-                          _vm.$set(_vm.fields, "share", $$c)
-                        }
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.ruby }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.fields.seller,
+                                      expression: "fields.seller"
+                                    }
+                                  ],
+                                  staticClass: "custom-select",
+                                  attrs: { id: "selectSellers" },
+                                  on: {
+                                    change: function($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call($event.target.options, function(
+                                          o
+                                        ) {
+                                          return o.selected
+                                        })
+                                        .map(function(o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        _vm.fields,
+                                        "seller",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    }
+                                  }
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    {
+                                      attrs: {
+                                        value: "",
+                                        disabled: "",
+                                        selected: "",
+                                        hidden: ""
+                                      }
+                                    },
+                                    [_vm._v("Seller...")]
+                                  ),
+                                  _vm._v(" "),
+                                  _vm._l(_vm.sellers, function(seller) {
+                                    return _c(
+                                      "option",
+                                      { domProps: { value: seller.value } },
+                                      [
+                                        _vm._v(
+                                          "\n\t\t\t\t\t                    " +
+                                            _vm._s(seller.text) +
+                                            "\n\t\t\t\t\t                "
+                                        )
+                                      ]
+                                    )
+                                  })
+                                ],
+                                2
+                              ),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "input-group-append" }, [
+                                _c(
+                                  "button",
+                                  {
+                                    staticClass: "btn btn-outline-success",
+                                    attrs: { type: "button" },
+                                    on: { click: _vm.flipForm }
+                                  },
+                                  [
+                                    _c("Octicon", {
+                                      attrs: { icon: _vm.Octicons.plus }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ])
+                            ])
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.calendar }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.date,
+                                    expression: "fields.date"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "date",
+                                  id: "datepicker",
+                                  placeholder: "Date..."
+                                },
+                                domProps: { value: _vm.fields.date },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "date",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _vm._m(0),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.amount,
+                                    expression: "fields.amount"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "number",
+                                  min: "0",
+                                  step: "0.01",
+                                  placeholder: "Amount..."
+                                },
+                                domProps: { value: _vm.fields.amount },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "amount",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-sm-12 col-md-8 col-lg-6" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.tag }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.description,
+                                    expression: "fields.description"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  id: "inlineFormInputName2",
+                                  placeholder: "Desciption (optional)"
+                                },
+                                domProps: { value: _vm.fields.description },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "description",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass:
+                                  "input-group custom-control custom-checkbox"
+                              },
+                              [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.fields.share,
+                                      expression: "fields.share"
+                                    }
+                                  ],
+                                  staticClass: "custom-control-input",
+                                  attrs: {
+                                    type: "checkbox",
+                                    id: "customCheck1"
+                                  },
+                                  domProps: {
+                                    checked: Array.isArray(_vm.fields.share)
+                                      ? _vm._i(_vm.fields.share, null) > -1
+                                      : _vm.fields.share
+                                  },
+                                  on: {
+                                    change: function($event) {
+                                      var $$a = _vm.fields.share,
+                                        $$el = $event.target,
+                                        $$c = $$el.checked ? true : false
+                                      if (Array.isArray($$a)) {
+                                        var $$v = null,
+                                          $$i = _vm._i($$a, $$v)
+                                        if ($$el.checked) {
+                                          $$i < 0 &&
+                                            _vm.$set(
+                                              _vm.fields,
+                                              "share",
+                                              $$a.concat([$$v])
+                                            )
+                                        } else {
+                                          $$i > -1 &&
+                                            _vm.$set(
+                                              _vm.fields,
+                                              "share",
+                                              $$a
+                                                .slice(0, $$i)
+                                                .concat($$a.slice($$i + 1))
+                                            )
+                                        }
+                                      } else {
+                                        _vm.$set(_vm.fields, "share", $$c)
+                                      }
+                                    }
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c(
+                                  "label",
+                                  {
+                                    staticClass: "custom-control-label",
+                                    attrs: { for: "customCheck1" }
+                                  },
+                                  [_vm._v("Share")]
+                                )
+                              ]
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-primary",
+                                attrs: { type: "submit" }
+                              },
+                              [_c("center", [_vm._v("Submit purchase")])],
+                              1
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "flip-card-back",
+                attrs: { id: "flip-card-back" }
+              },
+              [
+                _c(
+                  "form",
+                  {
+                    on: {
+                      submit: function($event) {
+                        $event.preventDefault()
+                        return _vm.submitSeller($event)
                       }
                     }
-                  }),
-                  _vm._v(" "),
-                  _c(
-                    "label",
-                    {
-                      staticClass: "custom-control-label",
-                      attrs: { for: "customCheck1" }
-                    },
-                    [_vm._v("Share")]
-                  )
-                ]
-              )
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" }, [
-              _c(
-                "button",
-                { staticClass: "btn btn-primary", attrs: { type: "submit" } },
-                [_c("center", [_vm._v("Submit purchase")])],
-                1
-              )
-            ])
-          ])
-        ]
-      )
+                  },
+                  [
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.ruby }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.name,
+                                    expression: "fields.name"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: { type: "text", placeholder: "Name" },
+                                domProps: { value: _vm.fields.name },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "name",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.url,
+                                    expression: "fields.url"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: { type: "text", placeholder: "URL" },
+                                domProps: { value: _vm.fields.url },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "url",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-9 col-md-6 col-lg-4" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.milestone }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.street,
+                                    expression: "fields.street"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: { type: "text", placeholder: "Street" },
+                                domProps: { value: _vm.fields.street },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "street",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-3 col-md-2 col-lg-2" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.fields.postalCode,
+                                    expression: "fields.postalCode"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  placeholder: "Postal code"
+                                },
+                                domProps: { value: _vm.fields.postalCode },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.fields,
+                                      "postalCode",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ])
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.pin }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.fields.city,
+                                      expression: "fields.city"
+                                    }
+                                  ],
+                                  staticClass: "custom-select",
+                                  attrs: { id: "selectUser" },
+                                  on: {
+                                    change: function($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call($event.target.options, function(
+                                          o
+                                        ) {
+                                          return o.selected
+                                        })
+                                        .map(function(o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        _vm.fields,
+                                        "city",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    }
+                                  }
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    {
+                                      attrs: {
+                                        value: "",
+                                        disabled: "",
+                                        selected: "",
+                                        hidden: ""
+                                      }
+                                    },
+                                    [_vm._v("City...")]
+                                  ),
+                                  _vm._v(" "),
+                                  _vm._l(_vm.cities, function(city) {
+                                    return _c(
+                                      "option",
+                                      { domProps: { value: city.value } },
+                                      [
+                                        _vm._v(
+                                          "\n\t\t\t\t\t                    " +
+                                            _vm._s(city.text) +
+                                            "\n\t\t\t\t\t                "
+                                        )
+                                      ]
+                                    )
+                                  })
+                                ],
+                                2
+                              )
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c("div", { staticClass: "input-group" }, [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "div",
+                                    { staticClass: "input-group-text" },
+                                    [
+                                      _c("Octicon", {
+                                        attrs: { icon: _vm.Octicons.globe }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "select",
+                                {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.fields.country,
+                                      expression: "fields.country"
+                                    }
+                                  ],
+                                  staticClass: "custom-select",
+                                  attrs: { id: "selectSellers" },
+                                  on: {
+                                    change: function($event) {
+                                      var $$selectedVal = Array.prototype.filter
+                                        .call($event.target.options, function(
+                                          o
+                                        ) {
+                                          return o.selected
+                                        })
+                                        .map(function(o) {
+                                          var val =
+                                            "_value" in o ? o._value : o.value
+                                          return val
+                                        })
+                                      _vm.$set(
+                                        _vm.fields,
+                                        "country",
+                                        $event.target.multiple
+                                          ? $$selectedVal
+                                          : $$selectedVal[0]
+                                      )
+                                    }
+                                  }
+                                },
+                                [
+                                  _c(
+                                    "option",
+                                    {
+                                      attrs: {
+                                        value: "",
+                                        disabled: "",
+                                        selected: "",
+                                        hidden: ""
+                                      }
+                                    },
+                                    [_vm._v("Country...")]
+                                  ),
+                                  _vm._v(" "),
+                                  _vm._l(_vm.countries, function(country) {
+                                    return _c(
+                                      "option",
+                                      { domProps: { value: country.value } },
+                                      [
+                                        _vm._v(
+                                          "\n\t\t\t\t\t                    " +
+                                            _vm._s(country.text) +
+                                            "\n\t\t\t\t\t                "
+                                        )
+                                      ]
+                                    )
+                                  })
+                                ],
+                                2
+                              )
+                            ])
+                          ]
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "form-group row justify-content-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-secondary",
+                                attrs: { type: "button" },
+                                on: { click: _vm.flipForm }
+                              },
+                              [_c("center", [_vm._v("Cancel")])],
+                              1
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-sm-6 col-md-4 col-lg-3" },
+                          [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-success",
+                                attrs: { type: "submit" }
+                              },
+                              [_c("center", [_vm._v("Submit seller")])],
+                              1
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]
+            )
+          ]
+        )
+      ])
     ],
     1
   )
