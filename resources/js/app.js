@@ -3,14 +3,15 @@
  * includes Vue and other libraries. It is a great starting point when
  * building robust, powerful web applications using Vue and Laravel.
  */
-
+import Vue from 'vue'
 import VueAxios from 'vue-axios';
 import axios from 'axios';
+import vSelect from 'vue-select'
  
 require('./bootstrap');
 
-window.Vue = require('vue');
 Vue.use(VueAxios, axios);
+Vue.component('v-select', vSelect)
 
 /**
  * The following block of code may be used to automatically register your

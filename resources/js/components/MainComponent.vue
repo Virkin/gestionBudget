@@ -135,6 +135,9 @@
     				document.getElementById("flip-card-front").style.visibility = "hidden"
 				}
     		},
+    		searchInSelect(selectName) {
+    			console.log(selectName);
+    		},
 		    submitPurchase() {
 		      this.errors = {};
 		      axios.post('http://127.0.0.1:8000/submitPurchase', this.fields).then(response => {
@@ -160,7 +163,7 @@
 			        console.log(error);
 			      });
 			    }
-		  },
+		    },
     }
     	
 </script>

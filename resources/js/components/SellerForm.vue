@@ -38,7 +38,7 @@
 		            <div class="input-group-prepend">
 	          			<div class="input-group-text"><Octicon :icon="Octicons.pin" /></div>
 	        		</div>
-		            <select v-model="$parent.fields.city" class="custom-select" id="selectUser">
+		            <select v-model="$parent.fields.city" v-on:keypress="$parent.searchInSelect('city')" class="custom-select" id="selectUser">
 		                <option value="" disabled selected hidden>City...</option>
 		                <option v-for="city in $parent.cities" v-bind:value="city.value">
 		                    {{ city.text }}
@@ -58,6 +58,7 @@
 		                    {{ country.text }}
 		                </option>
 		            </select>
+		            <!-- <v-select :options="$parent.countries" :pushTags="true"></v-select> -->
 	        	</div>
 	        </div>
 		</div>
